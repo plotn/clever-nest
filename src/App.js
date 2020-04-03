@@ -48,7 +48,9 @@ class ConfDevice extends React.Component {
       infoStr: "",
       needRefresh: 0,
       infoDialogOpen: false,
-      infoDialogText: ""
+      infoDialogText: "",
+      infoStatusDialogOpen: false,
+      infoStatusDialogText: ""
     };
   }
 
@@ -69,13 +71,15 @@ class ConfDevice extends React.Component {
         this.setState({
           devState: st,
           commandLog: result.data.log,
-          infoStr: today.toLocaleString()+" Ok (command "+sC+")"
+          infoStr: "Ok",
+          infoStatusDialogText: today.toLocaleString()+" Ok (command "+sC+")" 
         });
       },
       error => {
         this.setState({
           devState: -1,
-          infoStr: today.toLocaleString()+" Error accessing device (command "+sC+")"
+          infoStr: "Error",
+          infoStatusDialogText: today.toLocaleString()+" Error accessing device (command "+sC+")"
         });
       }
     );
@@ -96,14 +100,16 @@ class ConfDevice extends React.Component {
         this.setState({
           devState: result.data.state,
           commandLog: result.data.log,
-           infoStr: today.toLocaleString()+" Ok (command status)"
+          infoStr: "Ok",
+          infoStatusDialogText: today.toLocaleString()+" Ok (command status)"
         });
       },
       error => {
         let today  = new Date();
         this.setState({
           devState: -1,
-          infoStr: today.toLocaleString()+" Error accessing device (checking status) "
+          infoStr: "Error",
+          infoStatusDialogText: today.toLocaleString()+" Error accessing device (checking status) "
         });
       }
     );  
@@ -116,6 +122,24 @@ class ConfDevice extends React.Component {
         infoDialogOpen: true,
         infoDialogText: sStatus
       });    
+  }
+
+  handleClickInfoStatus(i) {
+    let sText = this.state.infoStatusDialogText;
+    if (!sText) sText = "";
+    if (sText === "") {
+      sText = this.props.device.dlastStateWhen;
+      try {
+        var dt = new Date(this.props.device.dlastStateWhen);
+        sText = dt.toLocaleString();
+      } finally {
+        
+      }
+    }
+    this.setState({
+      infoStatusDialogOpen: true,
+      infoStatusDialogText: sText
+    });    
   }
 
   componentDidMount() {
@@ -136,6 +160,12 @@ class ConfDevice extends React.Component {
     });
   };
 
+  handleInfoStatusClose(i) {
+    this.setState({
+      infoStatusDialogOpen: false
+    });
+  };
+
   render() {
     console.log("render dev "+this.props.device.did+" by conf = "+this.props.byconf);
     const st = this.state.devState;
@@ -151,9 +181,9 @@ class ConfDevice extends React.Component {
     }
     console.log(JSON.stringify(this.props.device));
     console.log(st);
-    let info = this.state.infoStr;    
+    let info = this.state.infoStr;   
     let sColorI = "black";
-    if (info.includes(" Ok")) {
+    if (info.includes("Ok")) {
       sColorI = "green"; 
     } else {
       sColorI = "red"; 
@@ -167,7 +197,7 @@ class ConfDevice extends React.Component {
       sState = devstate; 
       sColor = "darkgray";
       sColorI = "darkgray";
-      info = this.props.device.dlastStateWhen;
+      info = "info";
     }
 
     let rowsRes = [];
@@ -192,16 +222,16 @@ class ConfDevice extends React.Component {
         key={ii}>
         <Button onClick={i => this.handleClick(i,1)}>On</Button>
         <Button onClick={i => this.handleClick(i,0)}>Off</Button>
-        <Button onClick={i => this.handleClickStatus(i)}>Check status</Button>
-        <Button onClick={i => this.handleClickCommands(i)}>...</Button>
+        <Button onClick={i => this.handleClickStatus(i)}>Status</Button>
       </TableCell>   
     );
     ii++;
     rowsRes.push(   
       <TableCell 
         key={ii}
-        style={{ color: sColorI}}>
-        {info}
+        >
+        <Button style={{ color: sColorI}} onClick={i => this.handleClickInfoStatus(i)}>{info}</Button>
+        <Button onClick={i => this.handleClickCommands(i)}>...</Button>
       </TableCell>   
     );
     rowsRes.push(   
@@ -220,6 +250,28 @@ class ConfDevice extends React.Component {
         </DialogContent>
         <DialogActions>
           <Button onClick={i => this.handleInfoClose(i)} color="primary" autoFocus>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );  
+    ii++;
+    rowsRes.push(   
+      <Dialog
+        key={KEY_RANGE_DIALOGS + ii}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        open={this.state.infoStatusDialogOpen}
+        onClose={i => this.handleInfoStatusClose(i)}
+      >
+        <DialogTitle id="alert-dialog-title">Status info</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {this.state.infoStatusDialogText}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={i => this.handleInfoStatusClose(i)} color="primary" autoFocus>
             Close
           </Button>
         </DialogActions>
@@ -269,14 +321,17 @@ class ConfLocation extends React.Component {
     if (this.state.loadError !== "") {
       rowsRes.push(<TableRow key={KEY_RANGE_LOC_TR}><TableCell key="1">Error: {this.state.loadError}</TableCell></TableRow>);
     } else {
+      let sText = this.props.loc.lname;
+      let sText2 = this.props.loc.lvalue;
+      if (sText !== sText2) sText = sText + " - " + sText2;
       rowsRes.push( 
         <TableRow
           key={KEY_RANGE_LOC_TR + this.props.loc.lid}>
           <TableCell  
             colSpan={4} 
             className="conf-loc" onClick={this.props.onClick}>
-            <Typography variant="h5" gutterBottom>
-              {this.props.loc.lname} - {this.props.loc.lvalue}
+            <Typography variant="h6" gutterBottom>
+              {sText}
             </Typography> 
           </TableCell>
         </TableRow>
@@ -504,6 +559,7 @@ class ConfChoose extends React.Component {
     let rowsRes = [];  
     let curConf = null;
     //let curConfIdx = this.state.curConfIdx;
+    let confCount = 0;
     if (this.state.loadError !== "") {
       if ((this.state.loadError.includes("no-auth")) || (this.state.loadError.includes("401"))) {
         return (
@@ -549,8 +605,10 @@ class ConfChoose extends React.Component {
             curConf = this.state.dataRows.data[j];
           }
         };
+        confCount = 0;
         for (let j=0; j<this.state.dataRows.data.length; j++) {  
           if (curConf == null) curConf = this.state.dataRows.data[j];
+          confCount ++;
           rowsRes.push(
             <Button 
               key={KEY_RANGE_CONF + this.state.dataRows.data[j].cid} 
@@ -568,9 +626,9 @@ class ConfChoose extends React.Component {
       sColor = "maroon";
       locs = <ConfLocations byconf={curConf.cid} svcUrl={this.props.svcUrl} 
         needRefresh={this.state.needRefresh} token={this.state.token}></ConfLocations>;
-    }    
-    return (
-      <>
+    }
+    let rowsResC = [];
+    if (confCount !== 1) rowsResC.push(
       <div>
         Config
         (selected:&nbsp; 
@@ -580,6 +638,10 @@ class ConfChoose extends React.Component {
         ):
         {rowsRes}
       </div>
+    );   
+    return (
+      <>
+      {rowsResC}
       <div>
         <Button key="1000" onClick={i => this.handleClickRefresh(i)}>Refresh all</Button>
         <Button key="1001" onClick={i => this.handleLogout(i)}>Logout</Button>
@@ -623,18 +685,22 @@ class SvcUrlChoose extends React.Component {
     };
     for (let j=0; j<this.props.urls.length; j++) {  
       if (curUrl == null) curUrl = this.props.urls[j];
+      let sColorI = 'darkgray';
+      if (curUrl.urlId === this.props.urls[j].urlId) sColorI = 'green';
       rowsRes.push(
           <Button 
+            style={{ color: sColorI}}
             key={KEY_RANGE_URLS + this.props.urls[j].urlId} 
             onClick={i => this.handleClick(i, this.props.urls[j].urlId)}>{this.props.urls[j].urlDesc}
           </Button>
         );
     }; 
-    let desc = "loading...";
-    let sColor = "black";    
+    let desc = " (loading...) ";
+    //let sColor = "black";    
     if (curUrl != null) {
-      desc = curUrl.urlDesc+" ";
-      sColor = "maroon";
+      desc = "";
+      //desc = curUrl.urlDesc; //+" ";
+      //sColor = "maroon";
       rowsRes.push(
         <div key={KEY_RANGE_URLS}>
           <ConfChoose svcUrl={curUrl.urlAddr}></ConfChoose>
@@ -649,12 +715,7 @@ class SvcUrlChoose extends React.Component {
     }   
     return (
       <div>
-        URL
-        (selected:&nbsp; 
-        <span style={{ color: sColor}}>
-        {desc}
-        </span>
-        ):
+        URL{desc}:
         {rowsRes}
       </div>
     );
@@ -670,10 +731,18 @@ function App() {
   return (
     <div className="App">
       <div>
-        <img src={logo} alt={"logo"}/> 
-        <Typography variant="h4" gutterBottom>
-          Plotn Clever Nest app
-        </Typography>
+        <Table>
+          <TableRow>
+            <TableCell align='right' width='45%'>
+              <img src={logo} alt={"logo"}/> 
+            </TableCell>    
+            <TableCell align='left' width='55%'>
+              <Typography variant="h5" gutterBottom>
+                Plotn Clever Nest app
+              </Typography>
+            </TableCell>  
+          </TableRow>
+        </Table>
       </div>
       <div>
       <SvcUrlChoose urls={urls}></SvcUrlChoose>
