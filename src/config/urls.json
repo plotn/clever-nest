@@ -3,14 +3,16 @@
     "urlId": "1",
     "urlName": "plotnCleverNest_url_local",
     "urlDesc": "from Home",
-    "urlAddr1": "http://localhost:8086",
-    "urlAddr": "http://192.168.0.57:8086"
+    "urlAddr1": "http://192.168.0.57:8086",
+    "urlAddr": "http://localhost:8086",
+    "urlHint": "localhost;192.168.0.57"
   },
   {
     "urlId": "2",
     "urlName": "plotnCleverNest_url_inet",
     "urlDesc": "from Outside",
     "urlAddr": "http://814407a9fc09.sn.mynetname.net:8086",
-    "urlAddr1": "http://192.168.0.57:8086"
+    "urlHint": "814407a9fc09.sn.mynetname.net",
+    "urlAddr1": "http://814407a9fc09.sn.mynetname.net:8086"
   }
 ]
