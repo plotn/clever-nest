@@ -108,15 +108,24 @@ class ConfDevice extends React.Component {
   
     handleClickInfoStatus(i) {
       let sText = this.state.infoStatusDialogText;
+      let sText2 = ""; 
       if (!sText) sText = "";
       if (sText === "") {
         sText = this.props.device.dlastStateWhen;
+        sText2 = this.props.device.dlastStatusCheck;
         try {
           var dt = new Date(this.props.device.dlastStateWhen);
           sText = dt.toLocaleString();
         } finally {
           
         }
+        try {
+          var dt2 = new Date(this.props.device.dlastStatusCheck);
+          sText2 = dt2.toLocaleString();
+        } finally {
+          
+        }
+        sText = "Last changed: " + sText +"; last status received: " + sText2
       }
       this.setState({
         infoStatusDialogOpen: true,

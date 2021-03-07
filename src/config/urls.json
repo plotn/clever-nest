@@ -3,9 +3,9 @@
     "urlId": "1",
     "urlName": "plotnCleverNest_url_local",
     "urlDesc": "from Home",
-    "urlAddr1": "http://192.168.0.57:8086",
-    "urlAddr": "http://localhost:8086",
-    "urlHint": "localhost;192.168.0.57"
+    "urlAddr": "http://192.168.0.116:8086",
+    "urlAddr1": "http://localhost:8086",
+    "urlHint": "localhost;192.168.0.116"
   },
   {
     "urlId": "2",
