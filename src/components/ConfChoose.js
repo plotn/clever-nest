@@ -251,18 +251,18 @@ class ConfChoose extends React.Component {
         </div>
       );   
       return (
-        <>
-        {rowsResC}
-        <div>
-          <Button key="1000" onClick={i => this.handleClickRefresh(i)}>Refresh all</Button>
-          <Button key="1001" onClick={i => this.handleLogout(i)}>Logout</Button>
-          <Button key="1002" onClick={i => this.handleUsefulLinks(i)}>Useful links</Button>
-        </div> 
-        <div>
-          {uls}
-          {locs} 
-        </div>
-        </>
+        <React.Fragment>
+          {rowsResC}
+          <div>
+            <Button key="1000" onClick={i => this.handleClickRefresh(i)}>Refresh all</Button>
+            <Button key="1001" onClick={i => this.handleLogout(i)}>Logout</Button>
+            <Button key="1002" onClick={i => this.handleUsefulLinks(i)}>Useful links</Button>
+          </div> 
+          <div>
+            {uls}
+            {locs} 
+          </div>
+        </React.Fragment>
       );
     }
   }

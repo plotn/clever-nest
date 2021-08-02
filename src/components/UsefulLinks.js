@@ -51,7 +51,7 @@ class UsefulLinks extends React.Component {
         if (this.state.dataRows.data) {
           for (let i=0; i<this.state.dataRows.data.length; i++) {  
             rowsRes.push(
-              <>
+              <React.Fragment>
                 &nbsp;[
                 <a 
                   key={KEY_RANGE_UL + this.state.dataRows.data[i].lid}
@@ -60,7 +60,7 @@ class UsefulLinks extends React.Component {
                 {this.state.dataRows.data[i].ulDesc}
                 </a>  
                 ]&nbsp;          
-              </>
+              </React.Fragment>
             );
           }; 
         } else rowsRes.push(<TableRow key={KEY_RANGE_UL}><TableCell key="1">loading ...</TableCell></TableRow>);
