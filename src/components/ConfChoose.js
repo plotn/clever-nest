@@ -9,6 +9,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import ConfLocations from './ConfLocations.js';
+import UsefulLinks from './UsefulLinks.js';
 
 const cookies = new Cookies();
 const KEY_RANGE_CONF = 10000;
@@ -29,7 +30,8 @@ class ConfChoose extends React.Component {
         login: logn,
         passw: "",
         token: tokn,
-        errorDialogOpen: false
+        errorDialogOpen: false,
+        showUsefulLinks: false
       };
     } 
   
@@ -132,6 +134,12 @@ class ConfChoose extends React.Component {
       this.setState({ passw: "", token: "" });        
       this.loadContent(false);
     }
+
+    handleUsefulLinks(i) {
+      let ul = this.state.showUsefulLinks;
+      this.setState({ showUsefulLinks: !ul });        
+      this.loadContent(false);
+    }
   
     handleErrorClose(i) {
       this.setState({
@@ -146,50 +154,54 @@ class ConfChoose extends React.Component {
       //let curConfIdx = this.state.curConfIdx;
       let confCount = 0;
       if (this.state.loadError !== "") {
-        if ((this.state.loadError.includes("no-auth")) || (this.state.loadError.includes("401"))) {
-          return (
-            <div>
-              <TextField helperText="login" autoFocus
-                defaultValue={this.state.login} onChange={event => this.changeLogin(event.target.value)}></TextField>&nbsp;
-              <TextField helperText="password" type="password" onChange={event => this.changePassw(event.target.value)}
-                  onKeyPress={(ev) => {
-                    if (ev.key === 'Enter') {
-                      this.handleLogin(0);
-                      ev.preventDefault();
-                    }
-                  }}
-                ></TextField>
-              <Button 
-                onClick={i => this.handleLogin(i)}>Login
-              </Button>
-              <Dialog
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-                open={this.state.errorDialogOpen}
-                onClose={i => this.handleErrorClose(i)}
-              >
-                <DialogTitle id="alert-dialog-title">Error message</DialogTitle>
-                <DialogContent>
-                  <DialogContentText id="alert-dialog-description">
-                    {this.state.loadError}
-                  </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={i => this.handleErrorClose(i)} color="primary" autoFocus>
-                    Close
-                  </Button>
-                </DialogActions>
-              </Dialog>
-            </div>
-          );  
-        } else {
+        if (!((this.state.loadError.includes("no-auth")) || (this.state.loadError.includes("401"))))
           rowsRes.push(<div key={KEY_RANGE_CONF}>Error: {this.state.loadError}</div>);
-          return (
+        return (
+          <div>
             <div>
               {rowsRes}
             </div>
-          );
-        }
+            <TextField helperText="login" autoFocus
+              defaultValue={this.state.login} onChange={event => this.changeLogin(event.target.value)}></TextField>&nbsp;
+            <TextField helperText="password" type="password" onChange={event => this.changePassw(event.target.value)}
+                onKeyPress={(ev) => {
+                  if (ev.key === 'Enter') {
+                    this.handleLogin(0);
+                    ev.preventDefault();
+                  }
+                }}
+              ></TextField>
+            <Button 
+              onClick={i => this.handleLogin(i)}>Login
+            </Button>
+            <Dialog
+              aria-labelledby="alert-dialog-title"
+              aria-describedby="alert-dialog-description"
+              open={this.state.errorDialogOpen}
+              onClose={i => this.handleErrorClose(i)}
+            >
+              <DialogTitle id="alert-dialog-title">Error message</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  {this.state.loadError}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={i => this.handleErrorClose(i)} color="primary" autoFocus>
+                  Close
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
+        );  
+      // } else {
+      //   rowsRes.push(<div key={KEY_RANGE_CONF}>Error: {this.state.loadError}</div>);
+      //   return (
+      //     <div>
+      //       {rowsRes}
+      //     </div>
+      //   );
+      // }
       } else {
         if (this.state.dataRows.data) {
           for (let j=0; j<this.state.dataRows.data.length; j++) {  
@@ -219,6 +231,13 @@ class ConfChoose extends React.Component {
         locs = <ConfLocations byconf={curConf.cid} svcUrl={this.props.svcUrl} 
           needRefresh={this.state.needRefresh} token={this.state.token}></ConfLocations>;
       }
+      let uls = "loading...";
+      if (this.state.showUsefulLinks) {
+        //console.log("show uls");
+        uls = <UsefulLinks byconf={curConf.cid} svcUrl={this.props.svcUrl} 
+          needRefresh={this.state.needRefresh} token={this.state.token}></UsefulLinks>;
+      } else 
+        uls = "";
       let rowsResC = [];
       if (confCount !== 1) rowsResC.push(
         <div key="1002">
@@ -237,8 +256,10 @@ class ConfChoose extends React.Component {
         <div>
           <Button key="1000" onClick={i => this.handleClickRefresh(i)}>Refresh all</Button>
           <Button key="1001" onClick={i => this.handleLogout(i)}>Logout</Button>
+          <Button key="1002" onClick={i => this.handleUsefulLinks(i)}>Useful links</Button>
         </div> 
         <div>
+          {uls}
           {locs} 
         </div>
         </>
